@@ -9,7 +9,9 @@ import cv2
 import numpy as np
 import tkinter as tk
 import pygetwindow as gw
-
+import os
+import re
+import pywinauto as pwa
 
 # Get sceen resolution
 root = tk.Tk()
@@ -42,7 +44,21 @@ location_xy = [int(screen_width*0.6), 0]
 cv2.resizeWindow("Live", (int(screen_width*0.4), int(screen_height*0.4)))
 cv2.moveWindow("Live", *location_xy)
 
-# Capture Screen
+# Running the aforementioned command and saving its output
+output = os.popen('wmic process get description, processid').read()
+
+# Get process id to connect pywinauto
+celeste_pattern = r'Celeste.+[0-9]+'
+m = re.search(celeste_pattern, output)
+a, b = m.span()
+celeste_pid = int(re.findall(r'[0-9]+', output[a:b+1])[0]) 
+
+# Connect pywinauto
+celeste_app = pwa.Application().connect(process=celeste_pid)
+pwa.keyboard.send_keys('{VK_RIGHT}z{VK_RIGHT}z{VK_RIGHT}ccc')
+   
+
+# Capture Screen until `q` is pressed
 while True: 
     # Take screenshot using PyAutoGUI 
     celeste_reigon = (0, 0, CELESTE_WIDTH, CELESTE_HEIGHT)
